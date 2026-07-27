@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BW16 Specter — Dual-Band 2.4/5GHz Wi-Fi Pentesting & Sniffy Engine</title>
+  <meta name="description" content="Official BW16 Specter landing page and Web Serial Flasher for RTL8720DN. Dual-Band 2.4/5GHz deauther, autonomous Sniffy handshake engine, ST7735 TFT UI, and Captive Portal.">
+
+  <!-- Fonts & Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg:             #060810;
+      --bg-surface:     rgba(12, 16, 28, 0.85);
+      --card-bg:        rgba(15, 20, 36, 0.7);
+      --card-border:    rgba(139, 92, 246, 0.18);
+      --card-hover:     rgba(139, 92, 246, 0.4);
+      --purple:         #8b5cf6;
+      --purple-light:   #c4b5fd;
+      --purple-glow:    rgba(139, 92, 246, 0.35);
+      --cyan:           #22d3ee;
+      --cyan-glow:      rgba(34, 211, 238, 0.25);
+      --green:          #4ade80;
+      --red:            #f87171;
+      --amber:          #fbbf24;
+      --text:           #f8fafc;
+      --text-muted:     #94a3b8;
+      --text-dim:       #64748b;
+      --font-mono:      'JetBrains Mono', monospace;
+      --font-heading:   'Syne', sans-serif;
+      --font-body:      'Inter', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(139, 92, 246, 0.15) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 40% at 90% 90%, rgba(34, 211, 238, 0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 30% at 10% 60%, rgba(124, 58, 237, 0.06) 0%, transparent 50%);
+      color: var(--text);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Navigation ─────────────────────────────────────── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(6, 8, 16, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(139, 92, 246, 0.15);
+      padding: 0.9rem 2rem;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+
+    .nav-brand {
+      display: flex; align-items: center; gap: 0.75rem;
+      text-decoration: none; color: var(--text);
+    }
+    .nav-logo {
+      width: 38px; height: 38px; border-radius: 10px;
+      background: linear-gradient(135deg, #4c1d95, #1e1b4b);
+      border: 1px solid var(--purple-light);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 15px var(--purple-glow);
+    }
+    .nav-logo svg { width: 22px; height: 22px; stroke: #a78bfa; }
+    .nav-title { font-family: var(--font-heading); font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em; }
+    .nav-version { font-family: var(--font-mono); font-size: 0.75rem; padding: 2px 8px; border-radius: 20px; background: rgba(139, 92, 246, 0.15); color: var(--purple-light); border: 1px solid var(--card-border); }
+
+    .nav-links { display: flex; gap: 1.5rem; list-style: none; align-items: center; }
+    .nav-links a {
+      color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500;
+      transition: color 0.2s ease;
+    }
+    .nav-links a:hover { color: var(--cyan); }
+    .btn-nav {
+      background: linear-gradient(135deg, #7c3aed, #4338ca);
+      color: #fff !important; padding: 0.45rem 1.1rem; border-radius: 10px;
+      font-weight: 600 !important; box-shadow: 0 0 15px rgba(124, 58, 237, 0.4);
+      transition: all 0.25s ease !important;
+    }
+    .btn-nav:hover { transform: translateY(-1px); box-shadow: 0 0 25px rgba(139, 92, 246, 0.6); }
+
+    /* ── Main Container ─────────────────────────────────── */
+    .container { width: 100%; max-width: 1140px; margin: 0 auto; padding: 0 1.5rem; }
+
+    /* ── Hero Section ───────────────────────────────────── */
+    .hero {
+      text-align: center; padding: 4rem 1rem 3rem;
+      display: flex; flex-direction: column; align-items: center; gap: 1.25rem;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.4rem 1rem; border-radius: 100px;
+      background: rgba(139, 92, 246, 0.12); border: 1px solid var(--card-border);
+      font-family: var(--font-mono); font-size: 0.82rem; color: var(--purple-light);
+    }
+    .hero-badge .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px var(--green); animation: pulse 1.8s infinite; }
+
+    h1.hero-title {
+      font-family: var(--font-heading); font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800;
+      letter-spacing: -0.04em; line-height: 1.1;
+      background: linear-gradient(135deg, #ffffff 10%, #c4b5fd 40%, #818cf8 70%, #22d3ee 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      max-width: 900px;
+    }
+    .hero-subtitle {
+      font-size: 1.15rem; color: var(--text-muted); max-width: 720px; font-weight: 400; line-height: 1.7;
+    }
+    .hero-buttons { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-top: 0.5rem; }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem;
+      padding: 0.85rem 1.75rem; border-radius: 12px; font-family: var(--font-body); font-weight: 700;
+      font-size: 1rem; text-decoration: none; border: none; cursor: pointer; transition: all 0.25s ease;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #7c3aed 0%, #4338ca 100%);
+      color: #fff; box-shadow: 0 4px 25px rgba(124, 58, 237, 0.4);
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #8b5cf6 0%, #4f46e5 100%);
+      box-shadow: 0 6px 35px rgba(139, 92, 246, 0.6); transform: translateY(-2px);
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05); color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .btn-secondary:hover { background: rgba(255, 255, 255, 0.09); border-color: var(--purple-light); }
+
+    /* ── Feature Grid ───────────────────────────────────── */
+    .section { padding: 4rem 0; }
+    .section-header { text-align: center; margin-bottom: 3rem; }
+    .section-title { font-family: var(--font-heading); font-size: 2.2rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 0.5rem; }
+    .section-desc { color: var(--text-muted); font-size: 1.05rem; max-width: 600px; margin: 0 auto; }
+
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
+
+    .feature-card {
+      background: var(--bg-surface); backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border); border-radius: 20px; padding: 2rem;
+      display: flex; flex-direction: column; gap: 1rem; transition: all 0.3s ease;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .feature-card:hover {
+      border-color: var(--card-hover); transform: translateY(-4px);
+      box-shadow: 0 15px 40px rgba(139, 92, 246, 0.15);
+    }
+    .feature-icon {
+      width: 50px; height: 50px; border-radius: 14px;
+      background: rgba(139, 92, 246, 0.12); border: 1px solid var(--card-border);
+      display: flex; align-items: center; justify-content: center; color: var(--cyan);
+    }
+    .feature-card h3 { font-family: var(--font-heading); font-size: 1.3rem; font-weight: 700; color: var(--text); }
+    .feature-card p { font-size: 0.95rem; color: var(--text-muted); line-height: 1.65; }
+
+    /* ── Pinout & Wiring Section ────────────────────────── */
+    .pinout-box {
+      background: var(--bg-surface); border: 1px solid var(--card-border);
+      border-radius: 24px; padding: 2.5rem; display: flex; flex-direction: column; gap: 2rem;
+    }
+    .pinout-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
+
+    .pin-table { width: 100%; border-collapse: collapse; margin-top: 0.75rem; }
+    .pin-table th, .pin-table td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 0.9rem; }
+    .pin-table th { font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.08em; }
+    .pin-tag {
+      font-family: var(--font-mono); font-weight: 700; font-size: 0.82rem; padding: 3px 8px; border-radius: 6px; display: inline-block;
+    }
+    .tag-spi { background: rgba(34, 211, 238, 0.15); color: var(--cyan); border: 1px solid rgba(34,211,238,0.3); }
+    .tag-btn { background: rgba(139, 92, 246, 0.15); color: var(--purple-light); border: 1px solid rgba(139,92,246,0.3); }
+    .tag-pwr { background: rgba(248, 113, 113, 0.15); color: var(--red); border: 1px solid rgba(248,113,113,0.3); }
+
+    /* ── Web Flasher Card ───────────────────────────────── */
+    .flasher-card {
+      background: var(--bg-surface); backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border); border-radius: 24px; padding: 2.5rem;
+      display: flex; flex-direction: column; gap: 1.75rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 80px rgba(139, 92, 246, 0.08);
+    }
+
+    .info-banner {
+      background: rgba(139, 92, 246, 0.08); border: 1px solid var(--card-border);
+      border-radius: 16px; padding: 1.25rem; display: flex; gap: 1rem; align-items: flex-start;
+    }
+    .info-banner svg { width: 24px; height: 24px; color: var(--purple); flex-shrink: 0; margin-top: 2px; }
+    .info-banner-text { font-size: 0.95rem; color: #cbd5e1; line-height: 1.6; }
+    .info-banner-text strong { color: var(--text); }
+
+    .step-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 22px; height: 22px; border-radius: 50%; background: var(--purple-glow);
+      border: 1px solid var(--purple-light); font-size: 0.75rem; font-family: var(--font-mono);
+      font-weight: 700; color: var(--purple-light); margin-right: 6px;
+    }
+
+    .controls-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; }
+    .field-group { display: flex; flex-direction: column; gap: 0.5rem; }
+    .field-group label { font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.08em; }
+
+    select, input[type="file"] {
+      background: rgba(15, 20, 38, 0.8); border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px; color: var(--text); padding: 0.75rem 1rem; font-family: var(--font-body);
+      font-size: 0.95rem; outline: none; transition: all 0.25s ease; cursor: pointer;
+    }
+    select:focus, input[type="file"]:focus { border-color: var(--purple); box-shadow: 0 0 0 3px var(--purple-glow); }
+
+    .btn-connect {
+      background: rgba(139, 92, 246, 0.15); border: 1px solid var(--card-border); color: var(--purple-light);
+    }
+    .btn-connect:hover:not(:disabled) { background: rgba(139, 92, 246, 0.25); border-color: var(--purple); box-shadow: 0 0 20px var(--purple-glow); }
+    .btn-connect.connected { background: rgba(74, 222, 128, 0.12); border-color: rgba(74, 222, 128, 0.4); color: var(--green); }
+
+    .btn-flash {
+      background: linear-gradient(135deg, #7c3aed 0%, #4338ca 100%); color: #fff;
+      font-size: 1.05rem; padding: 1rem 2rem; box-shadow: 0 4px 25px rgba(124, 58, 237, 0.4);
+    }
+    .btn-flash:hover:not(:disabled) {
+      background: linear-gradient(135deg, #8b5cf6 0%, #4f46e5 100%);
+      box-shadow: 0 6px 35px rgba(139, 92, 246, 0.6); transform: translateY(-2px);
+    }
+    .btn-flash:disabled { background: rgba(100, 116, 139, 0.15); color: rgba(255, 255, 255, 0.3); cursor: not-allowed; box-shadow: none; transform: none; }
+
+    /* Progress & Terminal */
+    #progress-section { display: none; flex-direction: column; gap: 0.75rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 1.25rem; }
+    .progress-info { display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 600; }
+    #progress-label { color: var(--cyan); }
+    #progress-percent { font-family: var(--font-mono); color: var(--text-muted); }
+    .progress-track { height: 8px; width: 100%; background: rgba(255,255,255,0.08); border-radius: 10px; overflow: hidden; }
+    #progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--purple), var(--cyan)); border-radius: 10px; transition: width 0.35s ease; box-shadow: 0 0 12px var(--purple-glow); }
+
+    .terminal-wrap { display: flex; flex-direction: column; gap: 0.5rem; }
+    .terminal-header { display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-dim); }
+    .terminal {
+      background: #030508; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; height: 250px;
+      padding: 1rem; font-family: var(--font-mono); font-size: 0.83rem; line-height: 1.6; overflow-y: auto;
+      display: flex; flex-direction: column; gap: 0.25rem; white-space: pre-wrap; box-shadow: inset 0 2px 12px rgba(0,0,0,0.9);
+    }
+    .log-info { color: #818cf8; }
+    .log-success { color: var(--green); }
+    .log-warn { color: var(--amber); }
+    .log-error { color: var(--red); }
+    .log-debug { color: var(--text-dim); }
+
+    /* Accordion */
+    .accordion { border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; overflow: hidden; }
+    .accordion-hdr { background: rgba(255,255,255,0.02); padding: 0.85rem 1.25rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; font-weight: 600; color: var(--text-muted); user-select: none; }
+    .accordion-hdr:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+    .accordion-body { display: none; padding: 1.25rem; border-top: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2); flex-direction: column; gap: 1rem; }
+    .accordion.open .accordion-body { display: flex; }
+    .file-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+
+    /* Footer */
+    footer { border-top: 1px solid rgba(255,255,255,0.06); padding: 3rem 0; margin-top: 4rem; text-align: center; color: var(--text-dim); font-size: 0.9rem; }
+    footer a { color: var(--purple-light); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.6); } 70% { box-shadow: 0 0 0 8px rgba(74, 222, 128, 0); } 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); } }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav>
+    <a href="#" class="nav-brand">
+      <div class="nav-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2C8.686 2 6 4.686 6 8v8l-1.5 1.5L6 19l1.5-1.5L9 19l1.5-1.5L12 19l1.5-1.5L15 19l1.5-1.5L18 19l-1.5-1.5V8c0-3.314-2.686-6-6-6z"/>
+          <circle cx="9.5" cy="10" r="1" fill="#a78bfa" stroke="none"/>
+          <circle cx="14.5" cy="10" r="1" fill="#a78bfa" stroke="none"/>
+        </svg>
+      </div>
+      <span class="nav-title">BW16 Specter</span>
+      <span class="nav-version">v1.5.0 Beta</span>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#pinout">Pinout & Wiring</a></li>
+      <li><a href="#flasher">Web Flasher</a></li>
+      <li><a href="#webui">Web Interface</a></li>
+      <li><a href="#flasher" class="btn-nav">Flash Device</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-badge">
+        <span class="pulse"></span>
+        <span>RTL8720DN Dual-Band 2.4 / 5 GHz Active Pentesting Firmware</span>
+      </div>
+
+      <h1 class="hero-title">Autonomous 5GHz Wi-Fi Pentesting & Sniffy Engine</h1>
+
+      <p class="hero-subtitle">
+        BW16 Specter turns the Realtek RTL8720DN module into a powerful, standalone dual-band Wi-Fi deauther, 4-way handshake sniffer, and interactive cyberpunk TFT toolkit.
+      </p>
+
+      <div class="hero-buttons">
+        <a href="#flasher" class="btn btn-primary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Open Web Flasher
+        </a>
+        <a href="#pinout" class="btn btn-secondary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="15" x2="23" y2="15"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="15" x2="4" y2="15"/></svg>
+          Wiring & Pinout
+        </a>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="section">
+      <div class="section-header">
+        <h2 class="section-title">Core Functionality & Features</h2>
+        <p class="section-desc">Engineered specifically for the Realtek AmebaD RTL8720DN architecture.</p>
+      </div>
+
+      <div class="grid-3">
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+          </div>
+          <h3>Dual-Band 2.4GHz & 5GHz Deauther</h3>
+          <p>Full 802.11a/b/g/n packet injection support across both 2.4GHz and 5GHz frequencies. Target individual access points or specific client devices with raw deauth frames.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <h3>Autonomous Sniffy AI Engine</h3>
+          <p>Non-blocking single-scan sequential targeting mode. Automatically scans the spectrum, prioritizes strongest APs, initiates deauth bursts, and captures WPA/WPA2 handshakes without manual intervention.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <h3>ST7735 Cyberpunk Graphical UI</h3>
+          <p>Full 128x160 TFT display driver featuring an animated bitmap state machine, real-time RF waterfall spectrum analyzer, RSSI target sorting, and zero-flicker double-buffered updates.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+          </div>
+          <h3>WPA/WPA2 Handshake Capture</h3>
+          <p>Real-time EAPOL 4-way handshake detection and validation. Captured handshakes are stored in RAM and downloadable in standard <code>.pcap</code> format for hashcat/john analysis.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+          </div>
+          <h3>Captive Portal Phishing</h3>
+          <p>Host customizable responsive captive portals with DNS redirection and concurrent deauth enforcement to test client authentication resilience.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3>REST API & Remote Web UI</h3>
+          <p>Integrated SoftAP web server broadcasting on <code>192.168.4.1</code>. Full mobile/desktop web dashboard for remote execution, live logs, and configuration.</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Pinout & Wiring Section -->
+    <section id="pinout" class="section">
+      <div class="section-header">
+        <h2 class="section-title">Hardware Connections & Pinout Guide</h2>
+        <p class="section-desc">Wire your Ai-Thinker BW16 (RTL8720DN) module to the ST7735 TFT display and tactile navigation buttons.</p>
+      </div>
+
+      <div class="pinout-box">
+
+        <div class="pinout-grid">
+          <div>
+            <h3 style="font-family:var(--font-heading); font-size:1.3rem; margin-bottom:1rem; color:var(--cyan);">ST7735 SPI Display Pinout</h3>
+            <table class="pin-table">
+              <thead>
+                <tr>
+                  <th>Display Signal</th>
+                  <th>BW16 Pin</th>
+                  <th>Type</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>TFT_CS</strong> (Chip Select)</td>
+                  <td><span class="pin-tag tag-spi">PA27</span></td>
+                  <td>SPI CS</td>
+                </tr>
+                <tr>
+                  <td><strong>TFT_DC</strong> (Data/Cmd)</td>
+                  <td><span class="pin-tag tag-spi">PA25</span></td>
+                  <td>Control</td>
+                </tr>
+                <tr>
+                  <td><strong>TFT_RST</strong> (Reset)</td>
+                  <td><span class="pin-tag tag-spi">PA26</span></td>
+                  <td>Control</td>
+                </tr>
+                <tr>
+                  <td><strong>TFT_SCLK</strong> (Clock)</td>
+                  <td><span class="pin-tag tag-spi">PA14</span></td>
+                  <td>SPI CLK</td>
+                </tr>
+                <tr>
+                  <td><strong>TFT_MOSI</strong> (Data)</td>
+                  <td><span class="pin-tag tag-spi">PA12</span></td>
+                  <td>SPI MOSI</td>
+                </tr>
+                <tr>
+                  <td><strong>TFT_BLK</strong> (Backlight)</td>
+                  <td><span class="pin-tag tag-spi">PA30</span></td>
+                  <td>3.3V Control</td>
+                </tr>
+                <tr>
+                  <td><strong>VCC</strong></td>
+                  <td><span class="pin-tag tag-pwr">3.3V</span></td>
+                  <td>Power</td>
+                </tr>
+                <tr>
+                  <td><strong>GND</strong></td>
+                  <td><span class="pin-tag tag-pwr">GND</span></td>
+                  <td>Ground</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div>
+            <h3 style="font-family:var(--font-heading); font-size:1.3rem; margin-bottom:1rem; color:var(--purple-light);">Navigation Button Controls</h3>
+            <table class="pin-table">
+              <thead>
+                <tr>
+                  <th>Button</th>
+                  <th>BW16 Pin</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>UP Button</strong></td>
+                  <td><span class="pin-tag tag-btn">PB1</span></td>
+                  <td>Move selection UP / Navigate back</td>
+                </tr>
+                <tr>
+                  <td><strong>OK / SELECT</strong></td>
+                  <td><span class="pin-tag tag-btn">PB3</span></td>
+                  <td>Short Press: Toggle / Select<br><strong>Hold (Long Press): Return to Main Menu</strong></td>
+                </tr>
+                <tr>
+                  <td><strong>DOWN Button</strong></td>
+                  <td><span class="pin-tag tag-btn">PB2</span></td>
+                  <td>Move selection DOWN / Navigate next</td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="margin-top:1.25rem; font-size:0.88rem; color:var(--text-muted); background:rgba(255,255,255,0.03); border-radius:12px; padding:0.9rem 1rem;">
+              💡 <strong>Button Wiring Note:</strong> All buttons use internal <code>INPUT_PULLUP</code> resistors. Wire one side of each tactile switch to the respective BW16 pin and the other side to <strong>GND</strong>.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Web Flasher Section -->
+    <section id="flasher" class="section">
+      <div class="section-header">
+        <h2 class="section-title">Web Serial Firmware Flasher</h2>
+        <p class="section-desc">Flash the verified BW16 Specter Beta binary directly from Chrome, Edge, or Opera over USB-Serial.</p>
+      </div>
+
+      <div class="flasher-card">
+
+        <!-- Flash Setup Instructions Banner -->
+        <div class="info-banner">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div class="info-banner-text">
+            <div style="font-weight:700; color:var(--purple-light); font-family:var(--font-heading); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:0.25rem;">
+              Required Flash Mode Setup (UART Download Mode)
+            </div>
+            Before flashing, put your BW16 module into <strong>Download Mode</strong>:<br>
+            <span class="step-badge">1</span>Press and <strong>hold</strong> the <strong>BURN</strong> button.<br>
+            <span class="step-badge">2</span>Press and <strong>release</strong> the <strong>RST</strong> button.<br>
+            <span class="step-badge">3</span>Release <strong>BURN</strong> — the board serial port is now ready.
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls-row">
+          <div class="field-group">
+            <label>1. Serial Port</label>
+            <button id="btn-connect" class="btn btn-connect">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              Connect Serial Device
+            </button>
+          </div>
+
+          <div class="field-group">
+            <label>2. Firmware Build</label>
+            <div style="background:rgba(139,92,246,0.1); border:1px solid var(--card-border); border-radius:12px; padding:0.75rem 1rem; font-weight:700; color:var(--purple-light); font-size:0.95rem;">
+              BW16 Specter Beta (ST7735 TFT + Sniffy + WebUI)
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label>3. Upload Speed (Baud)</label>
+            <select id="select-baud">
+              <option value="1500000" selected>1,500,000 Baud (Fastest)</option>
+              <option value="921600">921,600 Baud</option>
+              <option value="115200">115,200 Baud (Safe)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div id="progress-section">
+          <div class="progress-info">
+            <span id="progress-label">Initializing...</span>
+            <span id="progress-percent">0%</span>
+          </div>
+          <div class="progress-track">
+            <div id="progress-bar"></div>
+          </div>
+        </div>
+
+        <!-- Flash Button -->
+        <button id="btn-flash" class="btn btn-flash" disabled>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Flash Firmware to BW16
+        </button>
+
+        <!-- Advanced Files Accordion -->
+        <div class="accordion" id="advanced-accordion">
+          <div class="accordion-hdr" id="accordion-toggle">
+            <span>📁 Advanced — Upload Custom Binary Overrides</span>
+            <span id="accordion-arrow">▼</span>
+          </div>
+          <div class="accordion-body">
+            <div style="font-size:0.88rem; color:var(--text-muted); line-height:1.5;">
+              By default, this web flasher embeds the pre-built <strong>806,912 byte</strong> Specter Beta binary. You can select custom compiled <code>.bin</code> files below to override any partition.
+            </div>
+            <div class="file-grid">
+              <div class="field-group"><label>Flashloader (.bin)</label><input type="file" id="file-loader" accept=".bin"></div>
+              <div class="field-group"><label>KM0 Boot (.bin)</label><input type="file" id="file-km0" accept=".bin"></div>
+              <div class="field-group"><label>KM4 Boot (.bin)</label><input type="file" id="file-km4" accept=".bin"></div>
+              <div class="field-group"><label>App Image (km0_km4_image2.bin)</label><input type="file" id="file-app" accept=".bin"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Terminal Log -->
+        <div class="terminal-wrap">
+          <div class="terminal-header">
+            <span>SERIAL FLASH CONSOLE LOG</span>
+            <button id="btn-clear" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:var(--text-dim); padding:2px 8px; border-radius:6px; cursor:pointer;">Clear</button>
+          </div>
+          <div id="terminal" class="terminal"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Web UI Access Guide -->
+    <section id="webui" class="section">
+      <div class="section-header">
+        <h2 class="section-title">Accessing Remote Web Dashboard</h2>
+        <p class="section-desc">Connect to the module over Wi-Fi after flashing to access the remote control web interface.</p>
+      </div>
+
+      <div style="background:var(--bg-surface); border:1px solid var(--card-border); border-radius:20px; padding:2rem; display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.5rem;">
+        <div>
+          <h4 style="font-family:var(--font-mono); color:var(--cyan); margin-bottom:0.5rem;">1. Connect to SoftAP</h4>
+          <p style="font-size:0.92rem; color:var(--text-muted);">
+            SSID: <code>BW16Specter</code><br>
+            Password: <code>specter16</code><br>
+            Default Channel: <code>1</code>
+          </p>
+        </div>
+
+        <div>
+          <h4 style="font-family:var(--font-mono); color:var(--purple-light); margin-bottom:0.5rem;">2. Open Browser Dashboard</h4>
+          <p style="font-size:0.92rem; color:var(--text-muted);">
+            Navigate to <code>http://192.168.4.1</code><br>
+            Captive portal auto-redirects on mobile devices.
+          </p>
+        </div>
+
+        <div>
+          <h4 style="font-family:var(--font-mono); color:var(--green); margin-bottom:0.5rem;">3. Download PCAP Files</h4>
+          <p style="font-size:0.92rem; color:var(--text-muted);">
+            Access captured handshakes directly at:<br>
+            <code>http://192.168.4.1/sniffy</code>
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    <div class="container">
+      <p>BW16 Specter Dual-Band Pentesting & Sniffy Engine &copy; 2026</p>
+      <p style="margin-top:0.5rem;">Designed & Developed by <a href="https://github.com/gamkers" target="_blank">gamkers</a> · Open Source RTL8720DN Project</p>
+    </div>
+  </footer>
+
+  <!-- EMBEDDED FIRMWARE DATA (Injected by generate_flasher.py) -->
+  <script id="firmware-data">
+    const embeddedFiles = {
+      flashloader: "PLACEHOLDER_FLASHLOADER",
+      km0_boot:    "PLACEHOLDER_KM0_BOOT",
+      km4_boot:    "PLACEHOLDER_KM4_BOOT",
+      app:         "PLACEHOLDER_APP"
+    };
+  </script>
+
+  <!-- FLASHER JAVASCRIPT ENGINE -->
+  <script>
+    const terminal    = document.getElementById('terminal');
+    const btnConnect  = document.getElementById('btn-connect');
+    const btnFlash    = document.getElementById('btn-flash');
+    const btnClear    = document.getElementById('btn-clear');
+    const selectBaud  = document.getElementById('select-baud');
+    const progSection = document.getElementById('progress-section');
+    const progBar     = document.getElementById('progress-bar');
+    const progLabel   = document.getElementById('progress-label');
+    const progPct     = document.getElementById('progress-percent');
+
+    let selectedPort = null, flashInProgress = false;
+
+    function log(msg, type = 'info') {
+      const el = document.createElement('div');
+      el.className = 'log-' + type;
+      el.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;
+      terminal.appendChild(el);
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+    btnClear.addEventListener('click', () => { terminal.innerHTML = ''; });
+
+    if (!('serial' in navigator)) {
+      btnConnect.disabled = true;
+      log('Web Serial API not available in this browser. Use Chrome / Edge / Opera.', 'error');
+    }
+
+    document.getElementById('accordion-toggle').addEventListener('click', () => {
+      const acc = document.getElementById('advanced-accordion');
+      acc.classList.toggle('open');
+      document.getElementById('accordion-arrow').textContent = acc.classList.contains('open') ? '▲' : '▼';
+    });
+
+    function setProgress(pct, label) {
+      progBar.style.width = pct + '%';
+      progLabel.textContent = label;
+      progPct.textContent = pct + '%';
+    }
+
+    btnConnect.addEventListener('click', async () => {
+      try {
+        selectedPort = await navigator.serial.requestPort();
+        btnConnect.textContent = '✓ Device Connected';
+        btnConnect.classList.add('connected');
+        btnFlash.disabled = false;
+        log('Serial port selected and connected.', 'success');
+      } catch (e) {
+        log('Port selection cancelled: ' + e.message, 'error');
+      }
+    });
+
+    async function readFileInput(id) {
+      const el = document.getElementById(id);
+      if (!el.files.length) return null;
+      return new Promise((res, rej) => {
+        const r = new FileReader();
+        r.onload = e => res(new Uint8Array(e.target.result));
+        r.onerror = e => rej(e);
+        r.readAsArrayBuffer(el.files[0]);
+      });
+    }
+
+    function b64toU8(b64) {
+      if (!b64 || b64.startsWith('PLACEHOLDER') || b64.trim() === '') return null;
+      const bin = atob(b64), out = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+      return out;
+    }
+
+    function checksum8(buf, len) {
+      let s = 0xFF;
+      for (let i = 0; i < len; i++) s = (s + buf[i]) & 0xFF;
+      return s;
+    }
+
+    function checksum32(data) {
+      const v = new DataView(data.buffer, data.byteOffset, data.byteLength);
+      let s = 0, tail = Math.floor(data.length / 4) * 4;
+      for (let i = 0; i < tail; i += 4) s = (s + v.getUint32(i, true)) >>> 0;
+      const rem = data.length - tail;
+      if (rem) { let w = 0; for (let i = 0; i < rem; i++) w |= data[tail+i] << (i*8); s = (s+w) >>> 0; }
+      return s;
+    }
+
+    class SerialHelper {
+      constructor(port) { this.port = port; this.reader = null; this.writer = null; this.q = []; this.alive = false; }
+      async open(baud) {
+        await this.port.open({ baudRate: baud });
+        this.writer = this.port.writable.getWriter();
+        this.reader = this.port.readable.getReader();
+        this.q = []; this.alive = true; this._loop();
+      }
+      async _loop() {
+        try { while (this.alive) { const {value,done} = await this.reader.read(); if (done) break; if (value) for (const b of value) this.q.push(b); } } catch {}
+      }
+      async readByte(ms = 1000) {
+        const t = Date.now();
+        while (!this.q.length) { if (Date.now()-t > ms) return null; await new Promise(r => setTimeout(r, 1)); }
+        return this.q.shift();
+      }
+      flush() { this.q = []; }
+      async waitSync(n, ms = 5000, flushFirst = false) {
+        if (flushFirst) this.flush();
+        let got = 0; const t = Date.now();
+        while (got < n) { if (Date.now()-t > ms) return false; const b = await this.readByte(50); if (b === 0x15) got++; }
+        return true;
+      }
+      async waitOk(ms = 5000) {
+        const t = Date.now();
+        while (Date.now()-t < ms) { const b = await this.readByte(50); if (b === 0x06) return true; }
+        return false;
+      }
+      async write(bytes) { await this.writer.write(new Uint8Array(bytes)); }
+      async changeSpeed(baud) {
+        this.alive = false;
+        await this.reader.cancel(); this.reader.releaseLock();
+        this.writer.releaseLock(); await this.port.close();
+        await new Promise(r => setTimeout(r, 300));
+        await this.open(baud);
+      }
+      async close() {
+        this.alive = false;
+        try { await this.reader.cancel(); this.reader.releaseLock(); } catch {}
+        try { this.writer.releaseLock(); } catch {}
+        try { await this.port.close(); } catch {}
+      }
+    }
+
+    async function writeBlock(serial, data, addr, onProg, seqStart = 1) {
+      const nPkts = Math.ceil(data.length / 1024);
+      if (!await serial.waitSync(1, 5000, true)) { log('Block sync timeout', 'error'); return null; }
+      for (let i = 0; i < nPkts; i++) {
+        const off = i*1024, chunk = Math.min(1024, data.length-off);
+        const pkt = new Uint8Array(1032);
+        pkt[0] = 0x02;
+        const seq = (seqStart+i) & 0xFF;
+        pkt[1] = seq; pkt[2] = (~seq) & 0xFF;
+        const a = addr+off;
+        pkt[3] = a & 0xFF; pkt[4] = (a>>8) & 0xFF; pkt[5] = (a>>16) & 0xFF; pkt[6] = (a>>24) & 0xFF;
+        pkt.set(data.subarray(off, off+chunk), 7);
+        if (chunk < 1024) pkt.fill(0xFF, 7+chunk, 1031);
+        pkt[1031] = checksum8(pkt, 1031);
+        let ok = false, retries = 0;
+        while (!ok && retries < 10) {
+          await serial.write(pkt);
+          const b = await serial.readByte(500);
+          if (b === 0x06) ok = true; else { retries++; await new Promise(r => setTimeout(r, 50)); }
+        }
+        if (!ok) { log('Packet ' + (i+1) + '/' + nPkts + ' failed after 10 retries', 'error'); return null; }
+        onProg((i+1)/nPkts);
+      }
+      return (seqStart+nPkts) & 0xFF;
+    }
+
+    btnFlash.addEventListener('click', async () => {
+      if (!selectedPort || flashInProgress) return;
+      flashInProgress = true;
+      btnFlash.disabled = true; btnConnect.disabled = true; selectBaud.disabled = true;
+      progSection.style.display = 'flex';
+      setProgress(0, 'Loading firmware binaries...');
+      let serial = null;
+      try {
+        log('Loading firmware binaries...', 'info');
+        const customLoader = await readFileInput('file-loader');
+        const customKm0    = await readFileInput('file-km0');
+        const customKm4    = await readFileInput('file-km4');
+        const customApp    = await readFileInput('file-app');
+        log('Firmware: BW16 Specter Beta', 'info');
+        const files = {
+          flashloader: customLoader || b64toU8(embeddedFiles.flashloader),
+          km0_boot:    customKm0    || b64toU8(embeddedFiles.km0_boot),
+          km4_boot:    customKm4    || b64toU8(embeddedFiles.km4_boot),
+          app:         customApp    || b64toU8(embeddedFiles.app)
+        };
+        if (!files.flashloader) throw new Error('Missing flashloader binary');
+        if (!files.km0_boot)    throw new Error('Missing km0_boot_all.bin');
+        if (!files.km4_boot)    throw new Error('Missing km4_boot_all.bin');
+        if (!files.app)         throw new Error('Missing application image');
+        log('Binaries verified — App size: ' + files.app.length + ' bytes', 'info');
+        const baud = parseInt(selectBaud.value);
+        serial = new SerialHelper(selectedPort);
+        log('Opening serial port at 115200 baud...', 'info');
+        await serial.open(115200);
+        setProgress(5, 'Connecting to bootloader...');
+        try {
+          await selectedPort.setSignals({ requestToSend: true,  dataTerminalReady: false });
+          await new Promise(r => setTimeout(r, 500));
+          await selectedPort.setSignals({ requestToSend: false, dataTerminalReady: true });
+          await new Promise(r => setTimeout(r, 200));
+          await selectedPort.setSignals({ requestToSend: false, dataTerminalReady: false });
+          await new Promise(r => setTimeout(r, 500));
+          log('DTR/RTS auto-reset signals toggled.', 'debug');
+        } catch { log('Auto-reset not supported — use BURN+RST buttons manually.', 'warn'); }
+        log('Waiting for bootloader handshake (0x15)...', 'warn');
+        if (!await serial.waitSync(2, 8000))
+          throw new Error('Bootloader sync timeout. Ensure BW16 is in Download Mode (Hold BURN -> Tap RST -> Release BURN).');
+        log('Bootloader handshake OK!', 'success');
+        let curBaud = 115200;
+        if (baud !== 115200) {
+          setProgress(8, 'Negotiating ' + baud + ' baud...');
+          const baudMap = { 1500000: 0x18, 921600: 0x14 };
+          if (!await serial.waitSync(1, 5000)) throw new Error('Sync before speed switch failed');
+          await serial.write([0x05, baudMap[baud]]);
+          if (!await serial.waitOk(2000)) throw new Error('Speed switch rejected');
+          await serial.changeSpeed(baud); curBaud = baud;
+          log('High-speed link active at ' + baud + ' baud.', 'success');
+        }
+        log('Link check...', 'info');
+        await serial.write([0x07]);
+        if (!await serial.waitOk(1000)) throw new Error('Link check failed');
+        if (!await serial.waitSync(1, 5000)) throw new Error('Post link-check sync failed');
+        log('Serial link confirmed.', 'success');
+        setProgress(10, 'Uploading flashloader to RAM...');
+        let seq = await writeBlock(serial, files.flashloader, 0x00082000, p => setProgress(10 + Math.round(p*10), 'Flashloader ' + Math.round(p*100) + '%'), 1);
+        if (seq === null) throw new Error('Failed to upload flashloader');
+        log('Flashloader loaded into RAM.', 'success');
+        setProgress(20, 'Executing flashloader...');
+        if (!await serial.waitSync(1, 5000)) throw new Error('Sync before exec failed');
+        await serial.write([0x04]);
+        if (!await serial.waitOk(1000)) throw new Error('Exec command failed');
+        if (curBaud !== 115200) { await serial.changeSpeed(115200); curBaud = 115200; }
+        log('Waiting for flashloader handshake...', 'info');
+        if (!await serial.waitSync(2, 6000)) throw new Error('Flashloader handshake timeout');
+        log('Flashloader running successfully.', 'success');
+        setProgress(25, 'Erasing flash partitions...');
+        await serial.write([0x26, 0x01, 0x01, 0x00]);
+        if (!await serial.waitOk(2000)) throw new Error('Flash config failed');
+        const parts = [
+          { name: 'KM0 Boot',  addr: 0x8000000, data: files.km0_boot },
+          { name: 'KM4 Boot',  addr: 0x8004000, data: files.km4_boot },
+          { name: 'App Image', addr: 0x8006000, data: files.app      }
+        ];
+        for (const p of parts) {
+          const sectors = Math.ceil(p.data.length / 4096), rel = p.addr & 0xFFFFFF;
+          log('Erasing ' + p.name + ' (' + sectors + ' sectors)...', 'info');
+          const cmd = [0x17, rel&0xFF, (rel>>8)&0xFF, (rel>>16)&0xFF, sectors&0xFF, (sectors>>8)&0xFF];
+          if (!await serial.waitSync(1, 5000)) throw new Error('Sync before erase of ' + p.name + ' failed');
+          await serial.write(cmd);
+          if (!await serial.waitOk(8000)) throw new Error('Erase failed for ' + p.name);
+          log(p.name + ' erased.', 'success');
+        }
+        if (!await serial.waitSync(1, 5000)) throw new Error('Post-erase sync failed');
+        log('All flash partitions erased.', 'success');
+        if (baud !== 115200) {
+          setProgress(30, 'Re-negotiating high speed...');
+          const baudMap = { 1500000: 0x18, 921600: 0x14 };
+          if (!await serial.waitSync(1, 5000)) throw new Error('Sync before HS switch failed');
+          await serial.write([0x05, baudMap[baud]]);
+          if (!await serial.waitOk(2000)) throw new Error('HS switch rejected');
+          await serial.changeSpeed(baud); curBaud = baud;
+          await serial.write([0x07]);
+          if (!await serial.waitOk(1000)) throw new Error('HS link check failed');
+          if (!await serial.waitSync(1, 5000)) throw new Error('HS sync failed');
+          log('Running at ' + baud + ' baud.', 'success');
+        }
+        let gSeq = 1;
+        const steps = [
+          { label: 'KM0 Boot',  start: 35, range: 5  },
+          { label: 'KM4 Boot',  start: 40, range: 5  },
+          { label: 'App Image', start: 45, range: 40 }
+        ];
+        for (let i = 0; i < parts.length; i++) {
+          const s = steps[i], p = parts[i];
+          setProgress(s.start, 'Writing ' + s.label + '...');
+          log('Programming ' + s.label + ' (' + p.data.length + ' bytes)...', 'info');
+          gSeq = await writeBlock(serial, p.data, p.addr, pct => setProgress(s.start + Math.round(pct*s.range), s.label + ' (' + Math.round(pct*100) + '%)'), gSeq);
+          if (gSeq === null) throw new Error('Write failed: ' + s.label);
+          log(s.label + ' programmed successfully.', 'success');
+        }
+        setProgress(85, 'Finalizing write...');
+        if (!await serial.waitSync(1, 5000)) throw new Error('Sync before finalize failed');
+        await serial.write([0x04]);
+        if (!await serial.waitOk(2000)) throw new Error('Finalize command failed');
+        if (curBaud !== 115200) { await serial.changeSpeed(115200); curBaud = 115200; }
+        if (!await serial.waitSync(1, 5000)) throw new Error('Post-finalize sync failed');
+        setProgress(90, 'Verifying checksums...');
+        for (const p of parts) {
+          const exp = checksum32(p.data), rel = p.addr & 0xFFFFFF, sz = p.data.length;
+          log('Verifying ' + p.name + ' (Expected: 0x' + exp.toString(16).toUpperCase() + ')...', 'info');
+          const cmd = [0x27, rel&0xFF, (rel>>8)&0xFF, (rel>>16)&0xFF, sz&0xFF, (sz>>8)&0xFF, (sz>>16)&0xFF];
+          if (!await serial.waitSync(1, 5000)) throw new Error('Sync before verify of ' + p.name + ' failed');
+          await serial.write(cmd);
+          let hdr = null; const t0 = Date.now();
+          while (Date.now()-t0 < 5000) { const b = await serial.readByte(100); if (b === 0x27) { hdr = b; break; } }
+          if (hdr !== 0x27) throw new Error('Verify header missing for ' + p.name);
+          const rb = [];
+          for (let j = 0; j < 4; j++) { const b = await serial.readByte(1000); if (b === null) throw new Error('Verify read timeout'); rb.push(b); }
+          const got = (rb[0] | rb[1]<<8 | rb[2]<<16 | rb[3]<<24) >>> 0;
+          if (got !== exp) throw new Error('Checksum mismatch on ' + p.name + ': got 0x' + got.toString(16) + ' expected 0x' + exp.toString(16));
+          log(p.name + ' checksum verified ✓', 'success');
+        }
+        setProgress(100, '🎉 Flash Complete!');
+        log('BW16 Specter firmware flashed successfully!', 'success');
+        try {
+          await selectedPort.setSignals({ requestToSend: true, dataTerminalReady: false });
+          await new Promise(r => setTimeout(r, 500));
+          await selectedPort.setSignals({ requestToSend: false, dataTerminalReady: false });
+          log('Auto-reset successful. BW16 Specter is now running.', 'success');
+        } catch { log('Please tap the RESET button on your BW16 module to boot.', 'info'); }
+      } catch (err) {
+        log('Flash failed: ' + err.message, 'error');
+        setProgress(parseInt(progBar.style.width) || 0, '❌ Failed');
+      } finally {
+        if (serial) { try { await serial.close(); } catch {} }
+        flashInProgress = false;
+        btnFlash.disabled = false; btnConnect.disabled = false; selectBaud.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
