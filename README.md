@@ -91,4 +91,4 @@ bw16-specter-release/
 
 ---
 
-*BW16 Specter created by [gamkers](https://github.com/gamkers).*
+*BW16 Specter created by GAMKERS COLAB WITH TIM(https://github.com/gamkers).*
